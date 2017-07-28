@@ -13,6 +13,7 @@ import { FindInput } from 'vs/base/browser/ui/findinput/findInput';
 import { IContextViewService } from 'vs/platform/contextview/browser/contextView';
 import { registerThemingParticipant, ITheme } from 'vs/platform/theme/common/themeService';
 import { inputBackground, inputActiveOptionBorder, inputForeground, inputBorder, inputValidationInfoBackground, inputValidationInfoBorder, inputValidationWarningBackground, inputValidationWarningBorder, inputValidationErrorBackground, inputValidationErrorBorder, editorWidgetBackground, widgetShadow } from 'vs/platform/theme/common/colorRegistry';
+import { HistoryNavigator } from 'vs/base/common/history';
 
 interface IButtonOpts {
 	label: string;
@@ -85,9 +86,11 @@ export abstract class SimpleFindWidget extends Widget {
 	protected _domNode: HTMLElement;
 	protected _isVisible: boolean;
 	protected _focusTracker: dom.IFocusTracker;
+	protected _findHistory: HistoryNavigator<string>;
 
 	constructor(
 		@IContextViewService private _contextViewService: IContextViewService,
+		// options: ISearchWidgetOptions,
 		private animate: boolean = true
 	) {
 		super();
@@ -96,6 +99,8 @@ export abstract class SimpleFindWidget extends Widget {
 			placeholder: NLS_FIND_INPUT_PLACEHOLDER,
 		}));
 
+		this._findHistory = new HistoryNavigator<string>();
+
 		this.oninput(this._findInput.domNode, (e) => {
 			this.onInputChanged();
 		});
@@ -103,12 +108,14 @@ export abstract class SimpleFindWidget extends Widget {
 		this._register(this._findInput.onKeyDown((e) => {
 			if (e.equals(KeyCode.Enter)) {
 				this.find(false);
+				this._findHistory.add(this._findInput.getValue());
 				e.preventDefault();
 				return;
 			}
 
 			if (e.equals(KeyMod.Shift | KeyCode.Enter)) {
 				this.find(true);
+				this._findHistory.add(this._findInput.getValue());
 				e.preventDefault();
 				return;
 			}
@@ -225,6 +232,20 @@ export abstract class SimpleFindWidget extends Widget {
 
 			dom.removeClass(this._domNode, 'visible');
 			this._domNode.setAttribute('aria-hidden', 'true');
+		}
+	}
+
+	public showNextFindTerm() {
+		let next = this._findHistory.next();
+		if (next) {
+			this._findInput.setValue(next);
+		}
+	}
+
+	public showPreviousFindTerm() {
+		let previous = this._findHistory.previous();
+		if (previous) {
+			this._findInput.setValue(previous);
 		}
 	}
 }
