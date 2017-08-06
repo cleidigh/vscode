@@ -52,9 +52,9 @@ export class ReleaseNotesEditor extends WebviewEditor {
 		@IPartService private partService: IPartService,
 		@IStorageService storageService: IStorageService,
 		@IContextViewService private _contextViewService: IContextViewService,
-		@IContextKeyService contextKeyService: IContextKeyService
+		@IContextKeyService private _contextKeyService: IContextKeyService
 	) {
-		super(ReleaseNotesEditor.ID, telemetryService, themeService, storageService, contextKeyService);
+		super(ReleaseNotesEditor.ID, telemetryService, themeService, storageService, _contextKeyService);
 	}
 
 	createEditor(parent: Builder): void {
@@ -95,7 +95,7 @@ export class ReleaseNotesEditor extends WebviewEditor {
 			})
 			.then(renderBody)
 			.then<void>(body => {
-				this._webview = new WebView(this.content, this.partService.getContainer(Parts.EDITOR_PART), this._contextViewService, this.contextKey);
+				this._webview = new WebView(this.content, this.partService.getContainer(Parts.EDITOR_PART), this._contextViewService, this._contextKeyService, this.contextKey);
 
 				if (this.input && this.input instanceof ReleaseNotesInput) {
 					const state = this.loadViewState(this.input.version);
