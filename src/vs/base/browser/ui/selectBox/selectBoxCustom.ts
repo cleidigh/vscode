@@ -245,11 +245,27 @@ export class SelectBoxList implements ISelectBoxDelegate, IListVirtualDelegate<I
 	}
 
 	public setOptions(options: ISelectOptionItem[], selected?: number): void {
-		if (!this.options || !arrays.equals(this.options, options)) {
+		if (typeof options === 'object' && options !== undefined || !arrays.equals(this.options, options)) {
 			this.options = options;
 			this.selectElement.options.length = 0;
 			this._hasDetails = false;
 
+			/*
+			console.info(options[0]);
+			console.info(options);
+
+			if(options[0] !== undefined && options[0].text === 'off') {
+
+				console.info(options[0].text +' L: '+options.length);
+				for (let index = 1; index < 90; index++) {
+					const i = options.length + index;
+					let option = <ISelectOptionItem> {};
+					option.text = `extraOption ${i}`;
+					this.options.push(option);
+
+				}
+			}
+ */
 			this.options.forEach((option, index) => {
 				this.selectElement.add(this.createOption(option.text, index, option.isDisabled));
 				if (typeof option.description === 'string') {
